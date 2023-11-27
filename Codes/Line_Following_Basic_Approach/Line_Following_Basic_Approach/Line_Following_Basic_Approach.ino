@@ -19,65 +19,68 @@
 
 #define ARRAY_LENGTH 8  // Should be changed accordingly
 
-int BWThreshold = 0;
-bool IRArray[ARRAY_LENGTH] = {0};       // This stores either black or white value of the IR sensors
+int BWThresholds[ARRAY_LENGTH] = {380, 380, 380, 380, 380, 380, 380, 380};
+bool IRArray[ARRAY_LENGTH] = {0, 0, 0, 0, 0, 0, 0, 0};       // This stores either black or white value of the IR sensors
+// int IRArray[ARRAY_LENGTH] = {0};
 
 int prevError = 0;
 int integral = 0;
 
-double Kp = 7;
+double Kp = 10;
 double Ki = 0;
-double Kd = 10;
+double Kd = 0;
 
-double speed = 10;
+double speed = 20;
 
 // Keep the robot fully on the arena (only black or white colors),
 // and calibrate to get the color details of the surface.
 void calibrate() {
-    short int values[225] = {0};
+    short int values[8][50] = {{0}};
     long long int time = millis();
     short int i = 0;
 
     digitalWrite(BUZZER, HIGH);
     while (millis() - time <= 5000) {   // Calibraiting for 5 seconds
-        values[i++] = analogRead(A0);
-        values[i++] = analogRead(A1);
-        values[i++] = analogRead(A2);
-        values[i++] = analogRead(A3);
-        values[i++] = analogRead(A4);
-        values[i++] = analogRead(A5);
-        values[i++] = analogRead(A6);
-        values[i++] = analogRead(A7);
-        delay(200);
+        for (short int j = 0; j < ARRAY_LENGTH; j++) {
+            values[j][i] = analogRead(j);
+        }
+        i++;
+        delay(100);
         // Serial.print(values[i - 1]);
         // Serial.print("\t");
     }
     digitalWrite(BUZZER, LOW);
     // Serial.println();
     
-    short int current_min = 1023, current_max = 0;
-    for (int j = 0; j < 200; j++) {
-        if (values[j] < current_min) {
-            current_min = values[j];
+    
+    for (short int j = 0; j < ARRAY_LENGTH; j++) {
+        short int currentMin = 1023, currentMax = 0;
+        for (short int k = 0; k < 50; k++) {
+            if (values[j][k] < currentMin) {
+                currentMin = values[j][k];
+            }
+            if (values[j][k] > currentMax) {
+                currentMax = values[j][k];
+            }
         }
-        if (values[j] > current_max) {
-            current_max = values[j];
-        }
+        BWThresholds[j] = (currentMin + currentMax) / 2;        
     }
 
-    Serial.print("Min value: ");
-    Serial.println(current_min);
-    Serial.print("Max value: ");
-    Serial.println(current_max);
-    BWThreshold = (current_min + current_max) / 2;
-    Serial.print("Current Threshold: ");
-    Serial.println(BWThreshold);
+    // DEBUG CODE
+    Serial.print("Thresholds: ");
+    for (int p = 0; p < ARRAY_LENGTH; p++) {
+        Serial.print(BWThresholds[p]);
+        Serial.print("\t");
+    }
+    Serial.println();
+    // DEBIG DONE.
 }
 
 void getIRData() {
     for (int i = 0; i < ARRAY_LENGTH; i++) {
         // Might need to change the sign > or <
-        IRArray[i] = analogRead(i) > BWThreshold;   // true or false
+        IRArray[i] = analogRead(i) > BWThresholds[i];   // true or false
+        // IRArray[i] = analogRead(i);
     }
 }
 
@@ -109,13 +112,23 @@ void motorDirection(int motor, int direction){
   }
 }
 
-void motorSpeed(double leftSpeed, double rigthSpeed) {
+void motorSpeed(double leftSpeed, double rightSpeed) {
     // Might need to swap ENA and ENB
+    if (leftSpeed > 255) leftSpeed = 255;
+    if (rightSpeed > 255) rightSpeed = 255;
+
+    // 3.3V limit
+    double limit = (255 / 5 * 3.3) - 1;
+    leftSpeed = map(leftSpeed, 0, 255, 0, limit);
+    rightSpeed = map(rightSpeed, 0, 255, 0, limit);
+
     analogWrite(ENA, leftSpeed);
-    analogWrite(ENB, rigthSpeed);
+    analogWrite(ENB, rightSpeed);
 }
 
 void setup() {
+    Serial.begin(9600);
+    
     pinMode(IN1, OUTPUT);
     pinMode(IN2, OUTPUT);
     pinMode(IN3, OUTPUT);
@@ -144,12 +157,12 @@ void setup() {
 }
 
 void loop() {
-    if (digitalRead(CALIBRATE_BUTTON)) {
+    if (digitalRead(CALIBRATE_BUTTON) == HIGH) {
         calibrate();
     }
     
     getIRData();
-    int error = (-3) * IRArray[0] + (-2) * IRArray[1] + (-1) * IRArray[2] + (+1) * IRArray[5] + (+2) * IRArray[6] + (+3) * IRArray[7];
+    int error = (-4) * IRArray[0] + (-2) * IRArray[1] + (-1) * IRArray[2] + (+1) * IRArray[5] + (+2) * IRArray[6] + (+4) * IRArray[7];
     int derivative = error - prevError;
     prevError = error;
     int integral = integral + error;
@@ -161,4 +174,12 @@ void loop() {
 
     motorSpeed(leftSpeed, rightSpeed);
 
+    // DEBUG
+    for (int i = 0; i < ARRAY_LENGTH; i++) {
+      Serial.print(IRArray[i]);
+      Serial.print("\t");
+    }
+    Serial.println();
+    delay(1000);
+    // DEBUG DONE.
 }
