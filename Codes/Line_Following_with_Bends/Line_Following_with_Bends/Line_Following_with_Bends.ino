@@ -32,12 +32,17 @@ LiquidCrystal_I2C lcd(0x27,20,4);  // set the LCD address to 0x27 for a 16 chars
 #define echoPin 7
 
 //pushbutton input for caliberation
-#define calibration 7
+#define caliberation 7
 
 //pin for buzzer
 #define buzzer_pin 8
 
+//pin for right bend sensor
+#define right_bend_sensor 9
+
 bool swich = 1; 
+
+bool bend_start = false;
 
 int now_time = 0;
 
@@ -47,10 +52,6 @@ String mode = "normal";
 int IR_array[8];
 
 int Threshold = 100;
-
-bool PID_disable = false;
-int Left_drive = 0, Right_drive = 0;
-int turning_factor = 1.2;
 
 //define right motor enable pin is 3 and left 2
 #define ENR 3
@@ -69,7 +70,7 @@ int distance;
 int x = 0;
 
 void motor(int motor, int direction);
-void calibrate();
+void caliberate();
 void buzzer_beep();
 void LCD_initial();
 
@@ -113,13 +114,15 @@ void setup() {
   pinMode(Motor_Left_Forward, OUTPUT);
   pinMode(Motor_Left_Backward, OUTPUT);
 
+  pinMode(right_bend_sensor, INPUT);
+
 
   // digitalWrite(Motor_Right_Forward,1);
 
   motor(1,1);
   motor(2,1);
 
-  pinMode(calibration, INPUT);
+  pinMode(caliberation, INPUT);
   
 }
 
@@ -127,8 +130,8 @@ int temp = 0;
 
 void loop() {
 
-  if (digitalRead(calibration) == 1){
-    calibrate();
+  if (digitalRead(caliberation) == 1){
+    caliberate();
   }
 
 
@@ -151,8 +154,8 @@ void loop() {
   // Serial.println(" ");
 
   int array_lit_amount = IR_array[0] + IR_array[1] + IR_array[2] + IR_array[3] + IR_array[4] + IR_array[5] + IR_array[6] + IR_array[7];
-  int left_sum = -(-4*IR_array[0] -3*IR_array[1] -2*IR_array[2] -1*IR_array[3]);
-  int right_sum = -(1*IR_array[4] +2*IR_array[5] +3*IR_array[6] +4*IR_array[7]);
+  int left_sum = -4*IR_array[0] -3*IR_array[1] -2*IR_array[2] -1*IR_array[3];
+  int right_sum = 1*IR_array[4] +2*IR_array[5] +3*IR_array[6] +4*IR_array[7];
   int position = left_sum + right_sum;
 
    derivative = position - prevError;
@@ -161,18 +164,17 @@ void loop() {
 
   prevError = position;
 
-  
   //Serial.println(position);
   // lcd.setCursor(2,2);
   // lcd.print("The IR weight: ");
   // lcd.print(position);
 
-  int Drive_constant = 40;
+  int Drive_constant = 50;
 
-  if (!PID_disable) {
-    Left_drive = Drive_constant + PID_constant;
-    Right_drive = Drive_constant - PID_constant;
-  }
+  int Left_drive = Drive_constant + PID_constant;
+  int Right_drive = Drive_constant - PID_constant;
+
+
 
   if (Left_drive > 255){
     Left_drive = 255;
@@ -201,84 +203,82 @@ void loop() {
     swich = 0;
   }
 
-  int new_left_sum = 0, new_right_sum = 0;
   if (mode == "normal"){
     //bend detection
-    new_left_sum = IR_array[0] + IR_array[1] + IR_array[2] + IR_array[3];
-    new_right_sum = IR_array[4] + IR_array[5] + IR_array[6] + IR_array[7];
-    if(new_right_sum >= 3 && new_left_sum <= 1){  // _| - right bend detected
+    if(right_sum >= 9 && left_sum > -4){
       //breaking
       motor(1,0);
       motor(2,0);
       now_time = millis();
-      mode = "right_bend";
-    }
-    else if (new_right_sum <= 1 && new_left_sum >= 3) { // |_ - left bend detected
-      //breaking
-      motor(1,0);
-      motor(2,0);
-      now_time = millis();
-      mode = "left_bend";
-    }
+      mode = "bend";
 
-    lcd.setCursor(3,3);
-    lcd.print("Mode: ");
-    lcd.setCursor(10,3);
-    lcd.print(mode);
+      bend_start = true;
+      
+      lcd.setCursor(3,3);
+      lcd.print("Mode: ");
+      lcd.print(mode);
 
+    }
   }
 
-  if (mode == "right_bend" || mode == "left_bend"){
-    //  if(millis() - now_time < 200){
-    //   Left_drive = 0;
-    //   Right_drive = 0;
-    // }else
-
-    PID_disable = true;
-
-    if (millis() - now_time < 800){ // This value can vary depending on the speed. If encoders are used, this approach will change.
-      motor(1,1);
-      motor(2,1);   
-      Left_drive = 40;
-      Right_drive = 40;
-    }else{
-      if (mode == "right_bend") {
-        buzzer_beep();
-        motor(1,0);
-        motor(2,1);
-
-        Left_drive = turning_factor * (Drive_constant + 10);
-        Right_drive = turning_factor * Drive_constant;
-      }
-      else if (mode == "left_bend") {
-        buzzer_beep();
+  if (mode == "bend"){
+    if(bend_start == true){
+      bend_start = false;
+      while (digitalRead(right_bend_sensor) == 0){
+        digitalWrite(buzzer_pin,HIGH);
+        // Serial.print("in loop:  ");
+        // Serial.println(digitalRead(right_bend_sensor));
         motor(1,1);
-        motor(2,0);
-
-        Left_drive =  turning_factor * Drive_constant;
-        Right_drive = turning_factor * (Drive_constant + 10);
+        motor(2,1);
+        Left_drive = 50;
+        Right_drive = 50;
+        analogWrite(ENL,Left_drive);
+        analogWrite(ENR,Right_drive);
       }
+        analogWrite(ENL,0);
+        analogWrite(ENR,0);
+        delay(1000);
+    array_lit_amount = 0;
+    }
+    // analogWrite(ENL,0);
+    // analogWrite(ENR,0);
+    // delay(1000);
 
-      if (new_left_sum > 0 || new_right_sum > 0){   // Turning is complete.
-        // Check again after a little while.
-        delay(200);
-        if (new_left_sum > 0 || new_right_sum > 0) {
-          mode = "normal";
-          PID_disable = false;
 
-          Serial.print("bend over");
-          lcd.setCursor(3,3);
-          lcd.print("Mode: ");
-          lcd.print(mode);
+    digitalWrite(buzzer_pin,LOW);
+    //buzzer_beep();
 
-          motor(1,1);
-          motor(2,1);
-        }
+    Serial.println(array_lit_amount);
+
+    motor(1,0);
+    motor(2,1);
+
+    Left_drive = 55;
+    Right_drive = 65;
+    Serial.println("in turning mode");
+
+
+    if (array_lit_amount >= 3){
+      //delay(50);
+      array_lit_amount = IR_array[0] + IR_array[1] + IR_array[2] + IR_array[3] + IR_array[4] + IR_array[5] + IR_array[6] + IR_array[7];
+      if (array_lit_amount >= 1){
+
+        Serial.print("bend over");
+        mode = "normal";
+        
+        
+        lcd.setCursor(3,3);
+        lcd.print("Mode: ");
+        lcd.print(mode);
+
+        
+        motor(1,1);
+        motor(2,1);
       }
     }
+
   }
 
-  
   if (swich == 1){
   analogWrite(ENL,Left_drive);
   analogWrite(ENR,Right_drive);
@@ -335,7 +335,7 @@ void loop() {
 }
 
 
-void calibrate(){
+void caliberate(){
 
   lcd.clear();
   lcd.setCursor(0,0);
