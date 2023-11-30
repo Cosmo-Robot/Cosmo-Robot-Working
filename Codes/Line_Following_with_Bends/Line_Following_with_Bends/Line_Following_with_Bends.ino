@@ -12,9 +12,9 @@ const int eepromAddress = 0; // EEPROM address where you want to start writing
 
 
 // Define PID parameters
-double Kp = 7;
+double Kp = 12;
 double Ki = 1.5;
-double Kd = 10;
+double Kd = 12;
 
 // Initialize PID variables
 double prevError = 0;
@@ -43,6 +43,8 @@ LiquidCrystal_I2C lcd(0x27,20,4);  // set the LCD address to 0x27 for a 16 chars
 bool swich = 1; 
 
 bool bend_start = false;
+
+bool bend_condition = false;
 
 int now_time = 0;
 
@@ -139,7 +141,7 @@ void loop() {
    for (int i = 0; i < 8; i++){
     // Serial.print(analogRead(i));
     // Serial.print(" ");
-    if (analogRead(i) > Ir_thresholds[i]){
+    if (analogRead(i) < Ir_thresholds[i]){
       temp = 1;}
     else{
       temp = 0;}
@@ -151,11 +153,11 @@ void loop() {
 //    Serial.print(IR_array[i]);
 //    Serial.print(" ");
 //   }
-  // Serial.println(" ");
+//   Serial.println(" ");
 
   int array_lit_amount = IR_array[0] + IR_array[1] + IR_array[2] + IR_array[3] + IR_array[4] + IR_array[5] + IR_array[6] + IR_array[7];
-  int left_sum = -4*IR_array[0] -3*IR_array[1] -2*IR_array[2] -1*IR_array[3];
-  int right_sum = 1*IR_array[4] +2*IR_array[5] +3*IR_array[6] +4*IR_array[7];
+  float left_sum = -5*IR_array[0] -3*IR_array[1] -2*IR_array[2] -1*IR_array[3];
+  float right_sum = 1*IR_array[4] +2*IR_array[5] +3*IR_array[6] +5*IR_array[7];
   int position = left_sum + right_sum;
 
    derivative = position - prevError;
@@ -169,7 +171,7 @@ void loop() {
   // lcd.print("The IR weight: ");
   // lcd.print(position);
 
-  int Drive_constant = 50;
+  int Drive_constant = 60;
 
   int Left_drive = Drive_constant + PID_constant;
   int Right_drive = Drive_constant - PID_constant;
@@ -203,35 +205,36 @@ void loop() {
     swich = 0;
   }
 
-  if (mode == "normal"){
-    //bend detection
-    if(right_sum >= 9 && left_sum > -4){
-      //breaking
-      motor(1,0);
-      motor(2,0);
-      now_time = millis();
-      mode = "bend";
+  // if (mode == "normal"){
+  //   //bend detection
+  //   if(right_sum >= 9 && left_sum > -4){
+  //     //breaking
+  //     motor(1,0);
+  //     motor(2,0);
+  //     now_time = millis();
+  //     mode = "bend";
 
-      bend_start = true;
+  //     bend_start = true;
       
-      lcd.setCursor(3,3);
-      lcd.print("Mode: ");
-      lcd.print(mode);
+  //     lcd.setCursor(3,3);
+  //     lcd.print("Mode: ");
+  //     lcd.print(mode);
 
-    }
-  }
+  //   }
+  // }
 
   if (mode == "bend"){
     if(bend_start == true){
       bend_start = false;
+      bend_condition = false;
       while (digitalRead(right_bend_sensor) == 0){
         digitalWrite(buzzer_pin,HIGH);
         // Serial.print("in loop:  ");
         // Serial.println(digitalRead(right_bend_sensor));
         motor(1,1);
         motor(2,1);
-        Left_drive = 50;
-        Right_drive = 50;
+        Left_drive = 60;
+        Right_drive = 60;
         analogWrite(ENL,Left_drive);
         analogWrite(ENR,Right_drive);
       }
@@ -253,15 +256,18 @@ void loop() {
     motor(1,0);
     motor(2,1);
 
-    Left_drive = 55;
-    Right_drive = 65;
+    Left_drive = 65;
+    Right_drive = 75;
     Serial.println("in turning mode");
 
 
-    if (array_lit_amount >= 3){
-      //delay(50);
-      array_lit_amount = IR_array[0] + IR_array[1] + IR_array[2] + IR_array[3] + IR_array[4] + IR_array[5] + IR_array[6] + IR_array[7];
-      if (array_lit_amount >= 1){
+    if (bend_condition == false){
+      if (array_lit_amount >= 3){
+
+        bend_condition = true;
+      }
+    } else {
+      if (IR_array[3] == 1 or IR_array[4] == 1){
 
         Serial.print("bend over");
         mode = "normal";
@@ -274,6 +280,12 @@ void loop() {
         
         motor(1,1);
         motor(2,1);
+
+        bend_condition = false;
+
+        analogWrite(ENL,0);
+        analogWrite(ENR,0);
+        delay(1000);
       }
     }
 
