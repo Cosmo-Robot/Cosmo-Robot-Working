@@ -131,8 +131,10 @@ void setup()
 
     for (int i = 0; i < 8; i++)
     {
+        byte temp = 0;
         // Ir_thresholds[i] = EEPROM.read(i)*4;
-        EEPROM.get(i, Ir_thresholds[i]);
+        EEPROM.get(i, temp);
+        Ir_thresholds[i] = temp;
     }
 
     Serial.print("int IR_thresholds[] = {");
@@ -227,11 +229,11 @@ void loop()
             // ========== CHANGE ONLY "LINE_COLOR" DEFINITION. ==========
             if (LINE_COLOR == "WHITE")
             {
-                temp = analogRead(i) < Ir_thresholds[i];
+                temp = analogRead(i) > Ir_thresholds[i];
             }
             else if (LINE_COLOR == "BLACK")
             {
-                temp = analogRead(i) > Ir_thresholds[i];
+                temp = analogRead(i) <= Ir_thresholds[i];
             }
             IR_array[7 - i] = temp;
         }
@@ -268,7 +270,7 @@ void loop()
         //  lcd.print("The IR weight: ");
         //  lcd.print(position);
 
-        int Drive_constant = 230; // 100 working
+        int Drive_constant = 200; // 100 working
 
         Left_drive = Drive_constant + PID_constant;
         Right_drive = Drive_constant - PID_constant;
@@ -299,11 +301,11 @@ void loop()
                 // Serial.print(" ");
                 if (LINE_COLOR == "WHITE")
                 {
-                    temp = analogRead(i) < Ir_thresholds[i];
+                    temp = analogRead(i) > Ir_thresholds[i];
                 }
                 else if (LINE_COLOR == "BLACK")
                 {
-                    temp = analogRead(i) > Ir_thresholds[i];
+                    temp = analogRead(i) <= Ir_thresholds[i];
                 }
                 IR_array[7 - i] = temp;
             }
