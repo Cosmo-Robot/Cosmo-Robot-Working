@@ -11,21 +11,22 @@ const int eepromAddress = 0; // EEPROM address where you want to start writing
 #define Debug_led 13
 
 // PID parameters for Line Following
-double Kp = 12;
+double Kp = 5;
 double Ki = 0;
-double Kd = 10;
+double Kd = 7;
 
 // PID parameters for Ultrasonic Wall Following
 double UKp = 35;
 double UKi = 0;
 double Ukd = 20;
 
+int Drive_constant = 200;
+
 // Initialize PID variables
 double prevError = 0;
 double integral = 0;
 double derivative = 0;
 
-// recorrect
 int Ir_thresholds[] = {300, 300, 100, 100, 100, 105, 400, 400};
 
 int prev_error_history[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -68,8 +69,9 @@ Status TASK = LINE; // 1 - Line Following, 2 - Wall Following, etc.
 // int TASK = 1; // 1 - Line Following, 2 - Wall Following, etc.
 
 // IR_array 8 space empty array
-#define IR_ARRAY_LENGTH 8 
+#define IR_ARRAY_LENGTH 12 
 int IR_array[IR_ARRAY_LENGTH];
+int calibrate_array_size = IR_ARRAY_LENGTH - 4;
 
 int Threshold = 100;
 
@@ -148,16 +150,14 @@ void setup()
     // Serial begin
     Serial.begin(115200);
 
-    for (int i = 0; i < IR_ARRAY_LENGTH; i++)
+    for (int i = 0; i < calibrate_array_size; i++)
     {
-        byte temp = 0;
         // Ir_thresholds[i] = EEPROM.read(i)*4;
-        EEPROM.get(i, temp);
-        Ir_thresholds[i] = temp;
+        EEPROM.get(i * sizeof(int), Ir_thresholds[i]);
     }
 
     Serial.print("int IR_thresholds[] = {");
-    for (int i = 0; i < IR_ARRAY_LENGTH; i++)
+    for (int i = 0; i < calibrate_array_size; i++)
     {
         Serial.print(Ir_thresholds[i]);
         Serial.print(", ");
@@ -195,9 +195,11 @@ int Right_drive = 0;
 
 void loop()
 {
+
+    Serial.println(Switch);
     // while(1) {
-    //     analogWrite(ENL, 255);
-    //     analogWrite(ENR, 255);
+    //     analogWrite(ENL, 230);
+    //     analogWrite(ENR, 170);
     //     motor(LEFT_MOTOR, FORWARD);
     //     motor(RIGHT_MOTOR, FORWARD);
     // }
@@ -207,23 +209,25 @@ void loop()
         calibrate();
     }
 
-    /*
+    
     // Gets the task to be started, using switches.
     // Maybe we can use an INTERRUPT.
-    if (digitalRead(TASK_SWITCH) == HIGH) {
-        TASK = getTaskFromSwitches();
+    // if (digitalRead(TASK_SWITCH) == HIGH) {
+    //     TASK = getTaskFromSwitches();
 
-        // Buzzer beep count can be used to get the task.
-        for (int i = 0; i < TASK; i++) {
-            buzzer_beep();
-        }
-    }
+    //     // Buzzer beep count can be used to get the task.
+    //     for (int i = 0; i < TASK; i++) {
+    //         buzzer_beep();
+    //     }
+    // }
   
     // Automatically increment task after detecting a white square.
     if (squareDetected()) {
-        TASK = Status(TASK + 1);
+        // TASK = Status(TASK + 1); // This is correct for the final competition.
+        TASK = HALT;
+        Serial.println("HALTED");
     }
-    */
+    
 
     if (TASK == LINE)
     {
@@ -263,7 +267,8 @@ void loop()
         }
     }
     else if (TASK == RAMP) {
-
+        // Mostly correct
+        lineFollow();
     }
     else if (TASK == PULL) {
         
@@ -292,8 +297,7 @@ void loop()
     else if (TASK == GUARD) {
         
     }
-    else {
-        // For safery, the robot will stop at any invalid TASK.
+    else if (TASK == HALT) {
         Switch = 0;
     }
 
@@ -311,7 +315,7 @@ void loop()
 }
 
 void readIRArray() {
-    for (int i = 0; i < IR_ARRAY_LENGTH; i++)
+    for (int i = 0; i < IR_ARRAY_LENGTH - 4; i++)
     {
         // Serial.print(analogRead(i));
         // Serial.print(" ");
@@ -324,8 +328,34 @@ void readIRArray() {
             temp = analogRead(i) > Ir_thresholds[i];
         }
         // IR_array[IR_ARRAY_LENGTH - 1 - i] = temp;
-        IR_array[i] = temp;
+
+        // IR_array[i] = temp; // This is correct if pins are connected in order.
+        IR_array[i + 2] = temp;
+
+        // This part is needed because the pins are connected not in order.
+        // if (i < 8) {
+        //     IR_array[i + 2] = temp;
+        // }
+        // else {
+        //     if (i == 8) IR_array[0] = temp;
+        //     else if (i == 9) IR_array[1] = temp;
+        //     else if (i == 10) IR_array[10] = temp;
+        //     else if (i == 11) IR_array[11] = temp;
+        // }
     }
+
+    IR_array[0] = LINE_COLOR == "BLACK" ? digitalRead(A11) : 1 - digitalRead(A11);
+    IR_array[1] = LINE_COLOR == "BLACK" ? digitalRead(A10) : 1 - digitalRead(A10);
+    IR_array[10] = LINE_COLOR == "BLACK" ? digitalRead(A9) : 1 - digitalRead(A9);
+    IR_array[11] = LINE_COLOR == "BLACK" ? digitalRead(A8) : 1 - digitalRead(A8);
+
+    
+    for (int i = 0; i < IR_ARRAY_LENGTH; i++)
+    {
+        Serial.print(IR_array[i]);
+        Serial.print(" ");
+    }
+    Serial.println();
 }
 
 int ultrasonicDistance(int sensor)
@@ -354,7 +384,6 @@ int ultrasonicDistance(int sensor)
 
 void calibrate()
 {
-
     motor(RIGHT_MOTOR, BACKWARD);
     motor(LEFT_MOTOR, FORWARD);
 
@@ -363,10 +392,10 @@ void calibrate()
     analogWrite(ENR, 255);
 
     // make sensor_max_values array of length 8 equal to sensor calibration array
-    int sensor_max_values[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    int sensor_max_values[calibrate_array_size] = {0};
 
     // sensor min values array
-    int sensor_min_values[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    int sensor_min_values[calibrate_array_size] = {0};
 
     int now_time_for_calibration = millis();
     Serial.print("now time for calibration: ");
@@ -380,7 +409,7 @@ void calibrate()
         digitalWrite(buzzer_pin, 1);
 
         bool allZeros = true;
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < calibrate_array_size; i++)
         {
             if (sensor_max_values[i] != 0)
             {
@@ -391,14 +420,14 @@ void calibrate()
 
         if (allZeros)
         {
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < calibrate_array_size; i++)
             {
                 sensor_max_values[i] = analogRead(i);
                 sensor_min_values[i] = analogRead(i);
             }
         }
 
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < calibrate_array_size; i++)
         {
             if (analogRead(i) > sensor_max_values[i])
             {
@@ -411,27 +440,27 @@ void calibrate()
         }
     }
     Serial.print("int IR_thresholds[] = {");
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < calibrate_array_size; i++)
     {
         Serial.print(sensor_max_values[i]);
         Serial.print(", ");
     }
     Serial.print("};    ");
     Serial.print("int IR_thresholds[] = {");
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < calibrate_array_size; i++)
     {
         Serial.print(sensor_min_values[i]);
         Serial.print(", ");
     }
     Serial.print("};    ");
 
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < calibrate_array_size; i++)
     {
         Ir_thresholds[i] = (sensor_max_values[i] + sensor_min_values[i]) / 2;
     }
 
     Serial.print("int IR_thresholds[] = {");
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < calibrate_array_size; i++)
     {
         Serial.print(Ir_thresholds[i]);
         Serial.print(", ");
@@ -439,10 +468,10 @@ void calibrate()
     Serial.println("};    ");
 
     // save the array to eeprom
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < calibrate_array_size; i++)
     {
         // EEPROM.write(i, byte(Ir_thresholds[i]/4));
-        EEPROM.put(i, byte(Ir_thresholds[i]));
+        EEPROM.put(i * sizeof(int), Ir_thresholds[i]);
     }
 
     delay(1000);
@@ -518,35 +547,40 @@ bool squareDetected() {
         array_lit_amount += IR_array[i];
     }
 
-    if (array_lit_amount > IR_ARRAY_LENGTH - 2) {   // Suspect this as a detection of white all long the array.
+    if (array_lit_amount == IR_ARRAY_LENGTH) {   // Suspect this as a detection of white all long the array.
     // This can either be a T junction or a white square.
+
+        Serial.println("we arrived the square test 1");
 
         // Go some distance forward and check again.
         motor(LEFT_MOTOR, FORWARD);
-        analogWrite(ENL, 255);
+        analogWrite(ENL, Drive_constant);
         motor(RIGHT_MOTOR, FORWARD);
-        analogWrite(ENR, 255);
+        analogWrite(ENR, Drive_constant);
 
-        delay(750); // Change accordingly.
+        delay(1500); // Change accordingly.
         
         analogWrite(ENL, 0);
         analogWrite(ENR, 0);
 
         readIRArray();
-        int array_lit_amount = 0;
+        array_lit_amount = 0;
         for (int i = 0; i < IR_ARRAY_LENGTH; i++) {
             array_lit_amount += IR_array[i];
         }
 
-        if (array_lit_amount > IR_ARRAY_LENGTH - 2) {
+        if (array_lit_amount == IR_ARRAY_LENGTH) {   // 2 here is a safety factor.
             // Should turn and align with a normal line before returning.
+            Serial.println("we arrived the square test 2");
             return true;
+           
         }
         else {
+            // Coming back a little
             motor(LEFT_MOTOR, BACKWARD);
-            analogWrite(ENL, 255);
+            analogWrite(ENL, Drive_constant);
             motor(RIGHT_MOTOR, BACKWARD);
-            analogWrite(ENR, 255);
+            analogWrite(ENR, Drive_constant);
 
             delay(600); // Change accordingly.
             
@@ -572,8 +606,14 @@ void lineFollow() {
     }
 
     // The following two lines should change with respect to IR array length.
-    float left_sum = -10 * IR_array[0] - 7 * IR_array[1] - 2 * IR_array[2] - 1 * IR_array[3];
-    float right_sum = 1 * IR_array[4] + 2 * IR_array[5] + 7 * IR_array[6] + 10 * IR_array[7];
+
+    // For 8 IR array.
+    // float left_sum = -10 * IR_array[0] - 7 * IR_array[1] - 2 * IR_array[2] - 1 * IR_array[3];
+    // float right_sum = 1 * IR_array[4] + 2 * IR_array[5] + 7 * IR_array[6] + 10 * IR_array[7];
+
+    // For 12 extended IR array.
+    float left_sum = -20 * IR_array[0] - 14 * IR_array[1] - 10 * IR_array[2] - 7 * IR_array[3] - 2 * IR_array[4] - 1 * IR_array[5];
+    float right_sum = 1 * IR_array[6] + 2 * IR_array[7] + 7 * IR_array[8] + 10 * IR_array[9] + 14 * IR_array[10] + 20 * IR_array[11];
 
     int position = left_sum + right_sum;
 
@@ -590,46 +630,48 @@ void lineFollow() {
 
     prevError = position;
 
-    int Drive_constant = 200;
+    Drive_constant = 200;
 
-    Left_drive = Drive_constant + PID_constant;
-    Right_drive = Drive_constant - PID_constant;
+    int offset = 30;    // For correcting motor speeds
+    Left_drive = Drive_constant + offset + PID_constant;
+    Right_drive = Drive_constant - offset - PID_constant;
 
     // Limiting to 0 - 255 range
     Left_drive = min(max(Left_drive, 0), 255);
     Right_drive = min(max(Right_drive, 0), 255);
 
-    // if (array_lit_amount == 0 and mode != "bend")
-    // {
-    //     Left_drive = 0;
-    //     Right_drive = 0;
-    //     analogWrite(ENL, Left_drive);
-    //     analogWrite(ENR, Right_drive);
-    //     digitalWrite(Debug_led, HIGH);
-    //     delay(50);
-    //     digitalWrite(Debug_led, LOW);
+    // if ((array_lit_amount == 0 or (IR_array[0] == 0 and IR_array[1] == 0 and IR_array[2] == 1 and IR_array[3] == 0 and IR_array[4] == 0 and IR_array[5] == 0 and IR_array[6] == 0 and IR_array[7] == 0))and mode != "bend")
+    if (array_lit_amount == 0 and mode != "bend")
+    {
+        Left_drive = 0;
+        Right_drive = 0;
+        analogWrite(ENL, Left_drive);
+        analogWrite(ENR, Right_drive);
+        digitalWrite(Debug_led, HIGH);
+        delay(50);
+        digitalWrite(Debug_led, LOW);
 
-    //     readIRArray();
+        readIRArray();
 
-    //     for (int i = 0; i < IR_ARRAY_LENGTH; i++) {
-    //         array_lit_amount += IR_array[i];
-    //     }
+        for (int i = 0; i < IR_ARRAY_LENGTH; i++) {
+            array_lit_amount += IR_array[i];
+        }
 
-    //     if (array_lit_amount == 0 and mode != "bend")
-    //     {
-    //         mode = "deviated";
-    //         // buzzer_beep();
-    //         // delay(20);
-    //         // buzzer_beep();
-    //         // delay(20);
-    //         // buzzer_beep();
-    //         // delay(20);
-    //         // buzzer_beep();
-    //         // delay(20);
-    //         // buzzer_beep();
-    //         // delay(20);
-    //     }
-    // }
+        if (array_lit_amount == 0 and mode != "bend")
+        {
+            mode = "deviated";
+            // buzzer_beep();
+            // delay(20);
+            // buzzer_beep();
+            // delay(20);
+            // buzzer_beep();
+            // delay(20);
+            // buzzer_beep();
+            // delay(20);
+            // buzzer_beep();
+            // delay(20);
+        }
+    }
 
     // if (mode == "normal" and bend_done == false){
     //   //bend detection
@@ -645,6 +687,11 @@ void lineFollow() {
     //     bend_start = true;
 
     //   }
+    // }
+
+    // Parking
+    // if (array_lit_amount == 12){
+    //     Switch = 0;
     // }
 
     if (mode == "bend")
