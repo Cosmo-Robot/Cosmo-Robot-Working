@@ -123,6 +123,9 @@ float ultrasonic_prev_error = 0;
 #define SWITCH_MID_SB 46
 #define SWITCH_LSB 47
 
+bool guardWait = true;
+int guard_T_count = 0;
+
 void readIRArray();
 void motor(int motor, int direction);
 void calibrate();
@@ -130,6 +133,7 @@ void buzzer_beep();
 int ultrasonicDistance(int sensor);
 Status getTaskFromSwitches();
 bool squareDetected();
+bool TDetected();
 
 void lineFollow();
 void wallFollow();
@@ -295,7 +299,49 @@ void loop()
         
     }
     else if (TASK == GUARD) {
-        
+        if (guardWait) {
+            // Stop on the square and wait until the guard robot passes.
+            analogWrite(ENL, 0);
+            analogWrite(ENR, 0);
+
+            int left_time = 0;
+            int right_times[2] = {0};
+            int right_pointer = 0;
+
+            int thresholdDistance = 30;
+            while(1) {
+                int ultrasonicDistanceLeft = ultrasonicDistance(SENSOR_LEFT);
+                int ultrasonicDistanceRight = ultrasonicDistance(SENSOR_RIGHT);
+                if (ultrasonicDistanceLeft < thresholdDistance) {
+                    left_time = millis();              
+                }
+                if (ultrasonicDistanceRight < thresholdDistance) {
+                    if (right_pointer == 2) {
+                        right_times[0] = right_times[1];
+                        right_pointer = 1;
+                    }
+                    right_times[right_pointer] = millis();
+                    right_pointer++;
+                }
+                if ((right_times[0] > left_time) && (right_times[1] > left_time)) {
+                    // Wait is over.
+                    // Guard robot has gone left.
+                    guardWait = false;
+                    break;
+                }
+            }
+        }
+        // Now go straight, turn right, and then go until the final square.
+        lineFollow();
+        if (TDetected() && guard_T_count == 1) {
+            // Turn right unconditionally.
+            analogWrite(ENL, 255);
+            analogWrite(ENR, 40);
+            delay(1000);    // Change accordingly.
+            analogWrite(ENL, 0);
+            analogWrite(ENR, 0);
+            guard_T_count++;
+        }
     }
     else if (TASK == HALT) {
         Switch = 0;
@@ -483,7 +529,7 @@ void calibrate()
 
     delay(4000);
 }
-
+ 
 void buzzer_beep()
 {
     digitalWrite(buzzer_pin, 1);
@@ -588,6 +634,21 @@ bool squareDetected() {
             analogWrite(ENR, 0);
             return false;
         }
+    }
+    else {
+        return false;
+    }
+}
+
+bool TDetected() {
+    readIRArray();
+    int array_lit_amount = 0;
+    for (int i = 0; i < IR_ARRAY_LENGTH; i++) {
+        array_lit_amount += IR_array[i];
+    }
+
+    if (array_lit_amount == IR_ARRAY_LENGTH) {
+        return true;
     }
     else {
         return false;
