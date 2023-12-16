@@ -1,5 +1,9 @@
 # Cosmo_Robot
+
+![Cosmo Robot](Images/in_operation.jpg)
+
 <h1>Cosmo Robot Project</h1>
+
 
   <p>This project is based on Arduino Mega 2560 and was developed for the Semester 3 Robot competition under the EN2533 - Robot Design and Competition module. The Cosmo robot is designed to showcase various capabilities, including precise line following, wall avoidance during line following, navigating ramps at 20-30 degrees, interacting with objects using a mechanical arm, sound sensitivity, collar detection, and maze-solving capabilities. Additionally, it can avoid obstacles, such as a guard robot, on its way to the final destination.</p>
 
