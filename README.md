@@ -35,8 +35,5 @@
 
   <p>Feel free to contribute to the project by submitting bug reports, feature requests, or pull requests. Your contributions are highly appreciated!</p>
 
-  <h2>License</h2>
-
-  <p>This project is licensed under the [LICENSE NAME] License - see the [LICENSE.md](LICENSE.md) file for details.</p>
 
 
