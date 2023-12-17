@@ -5,7 +5,7 @@
 <h1>Cosmo Robot Project</h1>
 
 
-  <p>This project is based on Arduino Mega 2560 and was developed for the Semester 3 Robot competition under the EN2533 - Robot Design and Competition module. The Cosmo robot is designed to showcase various capabilities, including precise line following, wall avoidance during line following, navigating ramps at 20-30 degrees, interacting with objects using a mechanical arm, sound sensitivity, collar detection, and maze-solving capabilities. Additionally, it can avoid obstacles, such as a guard robot, on its way to the final destination.</p>
+  <p>This project is based on Arduino Mega 2560 and was developed for the Semester 3 Robot competition under the EN2533 - Robot Design and Competition module. The Cosmo robot is designed to showcase various capabilities, including precise line following, wall avoidance during line following, navigating ramps at 20-30 degrees, interacting with objects using a mechanical arm, sound sensitivity, color detection, and maze-solving capabilities. Additionally, it can avoid obstacles, such as a guard robot, on its way to the final destination.</p>
 
   <h2>Features</h2>
 
@@ -15,7 +15,7 @@
       <li>Ramp Navigation (20-30 degrees)</li>
       <li>Mechanical Arm for Object Interaction</li>
       <li>Sound Sensitivity</li>
-      <li>Collar Detection</li>
+      <li>Color Detection</li>
       <li>Maze Solving Capabilities</li>
       <li>Obstacle Avoidance (Guard Robot)</li>
   </ul>
