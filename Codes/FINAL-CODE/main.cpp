@@ -132,6 +132,8 @@ bool bend_start = false;
 
 bool bend_condition = false;
 
+bool boxGrabbed = false;
+
 int now_time = 0;
 
 String mode = "normal";

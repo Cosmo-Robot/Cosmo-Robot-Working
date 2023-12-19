@@ -43,6 +43,8 @@ extern int Drive_constant;
 
 extern int pointer;
 
+extern bool boxGrabbed;
+
 #define MAX_ULTRASONIC_DISTANCE 30 // in centimeters
 
 // Motor and Direction Definitions

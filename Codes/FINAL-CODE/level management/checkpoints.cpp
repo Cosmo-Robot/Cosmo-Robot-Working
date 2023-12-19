@@ -3,23 +3,21 @@
 // /////////////////////////////////Definitions///////////////////////////////////////////////////////////////////////////////////////////////
 void checkpoint(){
     if (pointer == 3){
-        motor(LEFT_MOTOR, FORWARD);
-        motor(RIGHT_MOTOR, FORWARD);
-        analogWrite(ENL, 230);
-        analogWrite(ENR, 170);
-        delay(500);
-        arm.write(140);
-        analogWrite(ENL, 0);
-        analogWrite(ENR, 0);
-        delay(1000);
-        analogWrite(ENL, 240);
-        analogWrite(ENR, 160);
-        motor(LEFT_MOTOR, BACKWARD);
-        motor(RIGHT_MOTOR, BACKWARD);
-        delay(6000);
-        analogWrite(ENL, 0);
-        analogWrite(ENR, 0);
-        
+        if (boxGrabbed == false){
+            motor(LEFT_MOTOR, FORWARD);
+            motor(RIGHT_MOTOR, FORWARD);
+            analogWrite(ENL, 230);
+            analogWrite(ENR, 170);delay(500);
+            arm.write(140);
+            analogWrite(ENL, 0);
+            analogWrite(ENR, 0);delay(1000);
+            analogWrite(ENL, 240);
+            analogWrite(ENR, 160);
+            motor(LEFT_MOTOR, BACKWARD);
+            motor(RIGHT_MOTOR, BACKWARD);delay(6000);
+            arm.write(0);
+            boxGrabbed = true;
+        }   
       }
 
 
