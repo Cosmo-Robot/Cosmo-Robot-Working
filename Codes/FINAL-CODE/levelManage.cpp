@@ -10,7 +10,7 @@ void levelManage(){
         analogWrite(ENL, 230);
         analogWrite(ENR, 170);
         delay(500);
-        myservo.write(140);
+        arm.write(140);
         analogWrite(ENL, 0);
         analogWrite(ENR, 0);
         delay(1000);
@@ -70,11 +70,11 @@ void levelManage(){
 
         pointer++;
         // Stage_no = Stage_no +1 ;
-        myservo.write(120);
+        arm.write(120);
         delay(1000);
-        myservo.write(0);
+        arm.write(0);
         delay(1000);
-        myservo.write(120);
+        arm.write(120);
         motor(LEFT_MOTOR, FORWARD);
         motor(RIGHT_MOTOR, FORWARD);
         analogWrite(ENL, 230);
@@ -209,11 +209,11 @@ void levelManage(){
               delay(500);
               analogWrite(ENL, 0);
               analogWrite(ENR, 0);
-              myservo.write(120);
+              arm.write(120);
               delay(1000);
-              myservo.write(0);
+              arm.write(0);
               delay(1000);
-              myservo.write(120);
+              arm.write(120);
               break;
 
               // Switch = 0;
@@ -235,7 +235,7 @@ void levelManage(){
     else if (pointer == 3)
     {
       if(pull_box_arm_retract == false){
-        myservo.write(0);
+        arm.write(0);
         analogWrite(ENL, 0);
         analogWrite(ENR, 0);
         delay(100);
@@ -454,3 +454,108 @@ void levelManage(){
       Switch = 0;
     }
   }
+
+  /////////////////////Mode Selection////////////////////////////////////////
+  void modeSelect(){
+
+  delay(1000); // Wait for the sensors to be ready.
+  int POT_value = 0;
+  while (digitalRead(calibration) == 0)
+  {
+    // Serial.println(digitalRead(12));
+    if (digitalRead(12) == 1)
+    {
+      delay(600);
+      POT_value++;
+      while (true)
+      {
+        if (digitalRead(12) == 0)
+        {
+          break;
+        }
+      }
+    }
+    if (POT_value == 8)
+    {
+      POT_value = 0;
+    }
+    // Serial.println(POT_value);
+    if (POT_value == 0)
+    {
+      u8g2.clearBuffer();                 // clear the internal memory
+      u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
+      u8g2.drawStr(0, 10, "LINE");        // write something to the internal memory
+      u8g2.sendBuffer();                  // transfer internal memory to the display
+    }
+    else if (POT_value == 1)
+    {
+      u8g2.clearBuffer();                 // clear the internal memory
+      u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
+      u8g2.drawStr(0, 10, "WALL");        // write something to the internal memory
+      u8g2.sendBuffer();                  // transfer internal memory to the display
+    }
+    else if (POT_value == 2)
+    {
+      u8g2.clearBuffer();                 // clear the internal memory
+      u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
+      u8g2.drawStr(0, 10, "RAMP");        // write something to the internal memory
+      u8g2.sendBuffer();                  // transfer internal memory to the display
+    }
+    else if (POT_value == 3)
+    {
+      u8g2.clearBuffer();                 // clear the internal memory
+      u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
+      u8g2.drawStr(0, 10, "PULL");        // write something to the internal memory
+      u8g2.sendBuffer();                  // transfer internal memory to the display
+    }
+    else if (POT_value == 4)
+    {
+      u8g2.clearBuffer();                 // clear the internal memory
+      u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
+      u8g2.drawStr(0, 10, "COLOR");       // write something to the internal memory
+      u8g2.sendBuffer();                  // transfer internal memory to the display
+    }
+    else if (POT_value == 5)
+    {
+      u8g2.clearBuffer();                 // clear the internal memory
+      u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
+      u8g2.drawStr(0, 10, "SOUND");       // write something to the internal memory
+      u8g2.sendBuffer();                  // transfer internal memory to the display
+    }
+    else if (POT_value == 6)
+    {
+      u8g2.clearBuffer();                 // clear the internal memory
+      u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
+      u8g2.drawStr(0, 10, "GUARD");       // write something to the internal memory
+      u8g2.sendBuffer();                  // transfer internal memory to the display
+    }
+    else if (POT_value == 7)
+    {
+      u8g2.clearBuffer();                 // clear the internal memory
+      u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
+      u8g2.drawStr(0, 10, "HALT");        // write something to the internal memory
+      u8g2.sendBuffer();                  // transfer internal memory to the display
+    }
+    else
+    {
+      u8g2.clearBuffer();                 // clear the internal memory
+      u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
+      u8g2.drawStr(0, 10, "NOT DEF");     // write something to the internal memory
+      u8g2.sendBuffer();                  // transfer internal memory to the display
+    }
+  }
+
+  pointer = POT_value;
+
+  // pointer = 5;
+
+    u8g2.clearBuffer();                 // clear the internal memory
+    u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
+    u8g2.drawStr(0, 10, "ENTERED THE MODE");     // write something to the internal memory
+    u8g2.sendBuffer();                  // transfer internal memory to the display
+
+  delay(1000);
+
+}
+
+

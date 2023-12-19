@@ -4,7 +4,7 @@
 #include <U8g2lib.h>
 #include <Servo.h>
 
-extern Servo myservo; // create servo object to control a servo
+extern Servo arm; // create servo object to control a servo
 
 // Header guard to prevent multiple inclusions
 #ifndef LEVEL_MANAE_H
@@ -90,6 +90,9 @@ extern int Right_drive;
 #define ENR 3
 #define ENL 2
 
+#define calibration 7 // pushbutton input for calibration
+
 
 void levelManage();
+void modeSelect();
 #endif

@@ -2,12 +2,22 @@
 
 #include <Arduino.h>
 #include <EEPROM.h>
+#include <U8g2lib.h>
 
 // Header guard to prevent multiple inclusions
 #ifndef SENSORS_H
 #define SENSORS_H
 
 void motor(int motor, int direction);
+
+#ifdef U8X8_HAVE_HW_SPI
+#include <SPI.h>
+#endif
+#ifdef U8X8_HAVE_HW_I2C
+#include <Wire.h>
+#endif
+
+extern U8G2_SH1106_128X32_VISIONOX_F_HW_I2C u8g2;
 
 // Motor and Direction Definitions
 #define RIGHT_MOTOR 1
@@ -47,6 +57,8 @@ extern int stack_pointer;
 extern int Left_drive;
 extern int Right_drive;
 
+extern int sound_threshold;
+
 // pin for right bend sensor
 #define right_bend_sensor 9
 
@@ -58,5 +70,6 @@ extern int Right_drive;
 int ultrasonicDistance(int sensor);
 void readIRArray();
 void calibrate();
+void soundCalibrate();
 
 #endif

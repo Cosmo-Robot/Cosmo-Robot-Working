@@ -176,3 +176,24 @@ void readIRArray()
   // }
   // Serial.println();
 }
+
+
+///////////////////////////Sound Calibration///////////////////////////////////////////
+void soundCalibrate()
+{
+  int now_time = millis();
+  int max_sound = 0;
+  int min_sound = 1024;
+  u8g2.clearBuffer();                 // clear the internal memory
+  u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
+  u8g2.drawStr(0, 10, "SOUND CALIBERATING");        // write something to the internal memory
+  u8g2.sendBuffer();
+  while (millis()-now_time <= 5000){
+    int analog_sound_read = analogRead(A13);
+    Serial.println(analog_sound_read);
+    max_sound = max(analog_sound_read, max_sound);
+    min_sound = min(analog_sound_read,min_sound);
+  }
+  sound_threshold = (max_sound + min_sound)/2;
+  Serial.println(sound_threshold);
+}

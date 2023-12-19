@@ -104,7 +104,7 @@ void lineFollow()
   // }
   // if (array_lit_amount >= 10){
   //   Switch = 0;
-  //   myservo.write(120);
+  //   arm.write(120);
   // }
 
   if (mode == "bend")
