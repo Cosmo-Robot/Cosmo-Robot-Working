@@ -4,46 +4,47 @@
 #include <U8g2lib.h>
 #include <Servo.h>
 
-extern Servo arm; // create servo object to control a servo
+// External servo object to control a servo
+extern Servo arm;
 
 // Header guard to prevent multiple inclusions
 #ifndef LEVEL_MANAE_H
 #define LEVEL_MANAE_H
 
+// Function prototypes
 void motor(int motor, int direction);
 bool squareDetected();
 bool TDetected();
 void lineFollow();
 int ultrasonicDistance(int sensor);
 void readIRArray();
+void levelManage();
+void modeSelect();
+void checkpoint();
+void level1();
+void level2();
+void level3();
+void level4();
+void level5();
+void level6();
+void level7();
 
-#ifdef U8X8_HAVE_HW_SPI
-#include <SPI.h>
-#endif
-#ifdef U8X8_HAVE_HW_I2C
-#include <Wire.h>
-#endif
-
+// Constants and variables
 extern U8G2_SH1106_128X32_VISIONOX_F_HW_I2C u8g2;
 
 extern bool Switch;
 extern bool pull_bend;
-
 extern bool pull_box_arm_retract;
+extern bool boxGrabbed;
 
 extern int guard_left;
 extern int guard_right;
 extern int guard_left_prev;
 extern int guard_right_prev;
-
 extern int count;
 extern int sound_threshold;
-
 extern int Drive_constant;
-
 extern int pointer;
-
-extern bool boxGrabbed;
 
 #define MAX_ULTRASONIC_DISTANCE 30 // in centimeters
 
@@ -63,48 +64,31 @@ extern bool boxGrabbed;
 #define SENSOR_RIGHT_TRIG_PIN 36
 #define SENSOR_RIGHT_ECHO_PIN 38
 
-// pin for buzzer
+// Pin for buzzer
 #define buzzer_pin 8
 
-// ========== LINE_COLOR DEFINITION ==========
+// Line color definition
 extern const String LINE_COLOR;
 
-// IR_array 8 space empty array
+// IR_array and related variables
 #define IR_ARRAY_LENGTH 12
 extern int IR_array[IR_ARRAY_LENGTH];
-
 extern int Ir_thresholds[];
-
 extern int temp;
-
 extern int array_lit_amount;
-
 extern int prev_error_history[];
 extern int stack_pointer;
-
 extern int Left_drive;
 extern int Right_drive;
 
-// pin for right bend sensor
+// Pin for right bend sensor
 #define right_bend_sensor 9
 
-// define right motor enable pin is 3 and left 2
+// Motor enable pin definitions
 #define ENR 3
 #define ENL 2
 
-#define calibration 7 // pushbutton input for calibration
+// Calibration pushbutton input pin
+#define calibration 7
 
-
-void levelManage();
-void modeSelect();
-
-void checkpoint();
-
-void level1();
-void level2();
-void level3();
-void level4();
-void level5();
-void level6();
-void level7();
 #endif

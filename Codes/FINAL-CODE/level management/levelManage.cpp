@@ -1,155 +1,98 @@
 #include "levelManage.h"
 
-//////////////////////////////Managing Levels///////////////////////////////////////////
-void levelManage(){
-  if (squareDetected())
-    {
-      checkpoint();
+////////////////////////////// Managing Levels ///////////////////////////////////////////
+void levelManage() {
+    if (squareDetected()) {
+        checkpoint();
     }
 
-    ///////////////////////// 1] LINE FOLLOWING///////////////////////////////////////////
-    if (pointer == 0)
-    {
-      level1();
+    // Level selection based on pointer value
+    switch (pointer) {
+        case 0:
+            level1(); // LINE FOLLOWING
+            break;
+        case 1:
+            level2(); // WALL FOLLOWING
+            break;
+        case 2:
+            level3(); // RAMP
+            break;
+        case 3:
+            level4(); // PULL the Box
+            break;
+        case 4:
+            level5(); // Color FOLLOWING
+            break;
+        case 5:
+            level6(); // Sound Game
+            break;
+        case 6:
+            level7(); // GUARD AVOIDING
+            break;
+        default:
+            Switch = false; // Safety stop for an invalid task
+            break;
     }
-    ///////////////////////// 2] WALL FOLLOWING///////////////////////////////////////////
-    else if (pointer == 1)
-    {
-      level2();
-    }
-    ///////////////////////// 3] RAMP ///////////////////////////////////////////
-    else if (pointer == 2)
-    {
-      level3();
-    }
-    ///////////////////////// 4] PULL the Box///////////////////////////////////////////
-    else if (pointer == 3)
-    {
-      level4();
-    }
-    ///////////////////////// 5] Color FOLLOWING///////////////////////////////////////////
-    else if (pointer == 4)
-    {
-      level5(); 
-    }
-    ///////////////////////// 6] Sound Game ///////////////////////////////////////////
-    else if (pointer == 5) 
-    {
-      level6();
-    }
-    ///////////////////////// 7] GUARD AVOIDING///////////////////////////////////////////
-    else if (pointer == 6)
-    {
-      level7();
-    }
-    else
-    {
-      // For safery, the robot will stop at any invalid TASK.
-      Switch = 0;
-    }
-  }
-
-  /////////////////////Mode Selection////////////////////////////////////////
-  void modeSelect(){
-
-  delay(1000); // Wait for the sensors to be ready.
-  int POT_value = 0;
-  while (digitalRead(calibration) == 0)
-  {
-    // Serial.println(digitalRead(12));
-    if (digitalRead(12) == 1)
-    {
-      delay(600);
-      POT_value++;
-      while (true)
-      {
-        if (digitalRead(12) == 0)
-        {
-          break;
-        }
-      }
-    }
-    if (POT_value == 8)
-    {
-      POT_value = 0;
-    }
-    // Serial.println(POT_value);
-    if (POT_value == 0)
-    {
-      u8g2.clearBuffer();                 // clear the internal memory
-      u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
-      u8g2.drawStr(0, 10, "LINE");        // write something to the internal memory
-      u8g2.sendBuffer();                  // transfer internal memory to the display
-    }
-    else if (POT_value == 1)
-    {
-      u8g2.clearBuffer();                 // clear the internal memory
-      u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
-      u8g2.drawStr(0, 10, "WALL");        // write something to the internal memory
-      u8g2.sendBuffer();                  // transfer internal memory to the display
-    }
-    else if (POT_value == 2)
-    {
-      u8g2.clearBuffer();                 // clear the internal memory
-      u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
-      u8g2.drawStr(0, 10, "RAMP");        // write something to the internal memory
-      u8g2.sendBuffer();                  // transfer internal memory to the display
-    }
-    else if (POT_value == 3)
-    {
-      u8g2.clearBuffer();                 // clear the internal memory
-      u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
-      u8g2.drawStr(0, 10, "PULL");        // write something to the internal memory
-      u8g2.sendBuffer();                  // transfer internal memory to the display
-    }
-    else if (POT_value == 4)
-    {
-      u8g2.clearBuffer();                 // clear the internal memory
-      u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
-      u8g2.drawStr(0, 10, "COLOR");       // write something to the internal memory
-      u8g2.sendBuffer();                  // transfer internal memory to the display
-    }
-    else if (POT_value == 5)
-    {
-      u8g2.clearBuffer();                 // clear the internal memory
-      u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
-      u8g2.drawStr(0, 10, "SOUND");       // write something to the internal memory
-      u8g2.sendBuffer();                  // transfer internal memory to the display
-    }
-    else if (POT_value == 6)
-    {
-      u8g2.clearBuffer();                 // clear the internal memory
-      u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
-      u8g2.drawStr(0, 10, "GUARD");       // write something to the internal memory
-      u8g2.sendBuffer();                  // transfer internal memory to the display
-    }
-    else if (POT_value == 7)
-    {
-      u8g2.clearBuffer();                 // clear the internal memory
-      u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
-      u8g2.drawStr(0, 10, "HALT");        // write something to the internal memory
-      u8g2.sendBuffer();                  // transfer internal memory to the display
-    }
-    else
-    {
-      u8g2.clearBuffer();                 // clear the internal memory
-      u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
-      u8g2.drawStr(0, 10, "NOT DEF");     // write something to the internal memory
-      u8g2.sendBuffer();                  // transfer internal memory to the display
-    }
-  }
-
-  pointer = POT_value;
-
-  // pointer = 5;
-
-    u8g2.clearBuffer();                 // clear the internal memory
-    u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
-    u8g2.drawStr(0, 10, "ENTERED THE MODE");     // write something to the internal memory
-    u8g2.sendBuffer();                  // transfer internal memory to the display
-
-  delay(1000);
-
 }
 
+///////////////////////////// Mode Selection ////////////////////////////////////////////
+void modeSelect() {
+    delay(1000); // Wait for the sensors to be ready
+    int POT_value = 0;
 
+    while (digitalRead(calibration) == LOW) {
+        if (digitalRead(12) == HIGH) {
+            delay(600);
+            POT_value = (POT_value + 1) % 8;
+            while (digitalRead(12) == HIGH) {}
+        }
+
+        // Display mode on screen based on POT_value
+        const char* modeText = "";
+        switch (POT_value) {
+            case 0:
+                modeText = "LINE";
+                break;
+            case 1:
+                modeText = "WALL";
+                break;
+            case 2:
+                modeText = "RAMP";
+                break;
+            case 3:
+                modeText = "PULL";
+                break;
+            case 4:
+                modeText = "COLOR";
+                break;
+            case 5:
+                modeText = "SOUND";
+                break;
+            case 6:
+                modeText = "GUARD";
+                break;
+            case 7:
+                modeText = "HALT";
+                break;
+            default:
+                modeText = "NOT DEF";
+                break;
+        }
+
+        // Display selected mode on the screen
+        u8g2.clearBuffer();
+        u8g2.setFont(u8g2_font_ncenB08_tr);
+        u8g2.drawStr(0, 10, modeText);
+        u8g2.sendBuffer();
+    }
+
+    pointer = POT_value;
+
+    // Display mode confirmation on the screen
+    u8g2.clearBuffer();
+    u8g2.setFont(u8g2_font_ncenB08_tr);
+    u8g2.drawStr(0, 10, "ENTERED THE MODE");
+    u8g2.sendBuffer();
+
+    delay(1000);
+}

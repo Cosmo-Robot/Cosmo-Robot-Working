@@ -1,27 +1,30 @@
 #include "levelManage.h"
-// /////////////////////////////////under the ramp///////////////////////////////////////////////////////////////////////////////////////////////
 
-// /////////////////////////////////Definitions///////////////////////////////////////////////////////////////////////////////////////////////
-void level4(){
-    if(pull_box_arm_retract == false){
-      arm.write(0);
-      analogWrite(ENL, 0);
-      analogWrite(ENR, 0);
-      delay(100);
-      pull_box_arm_retract = true;
+// Function for level 4
+void level4() {
+    if (pull_box_arm_retract == false) {
+        arm.write(0);
+        analogWrite(ENL, 0);
+        analogWrite(ENR, 0);
+        delay(100);
+        pull_box_arm_retract = true;
     }
     
     lineFollow();
 
-    if(TDetected()){
+    if (TDetected()) {
         motor(LEFT_MOTOR, FORWARD);
         motor(RIGHT_MOTOR, FORWARD);
         analogWrite(ENL, 230);
-        analogWrite(ENR, 170); delay(900);
+        analogWrite(ENR, 170);
+        delay(900);
+
         motor(LEFT_MOTOR, FORWARD);
         motor(RIGHT_MOTOR, BACKWARD);
         analogWrite(ENL, 255);
-        analogWrite(ENR, 255);delay(750);
+        analogWrite(ENR, 255);
+        delay(750);
+
         pull_bend = true;
     }
 }
