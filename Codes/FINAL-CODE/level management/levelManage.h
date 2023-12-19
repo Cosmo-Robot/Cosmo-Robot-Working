@@ -95,4 +95,14 @@ extern int Right_drive;
 
 void levelManage();
 void modeSelect();
+
+void checkpoint();
+
+void level1();
+void level2();
+void level3();
+void level4();
+void level5();
+void level6();
+void level7();
 #endif
