@@ -10,13 +10,13 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 #include <Servo.h>
-#include <U8g2lib.h>
+#include <U8g2lib.h> // include u8g2 library
 
 // Header guard to prevent multiple inclusions
-#include "lineFollow.h"
-#include "detections.h"
-#include "sensors.h"
-#include "levelManage.h"
+#include "line follow/lineFollow.h"
+#include "detections/detections.h"
+#include "sensors/sensors.h"
+#include "level management/levelManage.h"
 
 /////////////////////////////////Object Definitions///////////////////////////////////////////////////////////////////////////////////////////////
 
