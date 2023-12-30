@@ -10,6 +10,7 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 #include <Servo.h>
+#include <Adafruit_I2CDevice.h> 
 #include <U8g2lib.h> // include u8g2 library
 
 // Header guard to prevent multiple inclusions
@@ -115,6 +116,8 @@ int guard_right_prev = 2;
 
 int count = 0;
 
+int crossCount = 0;
+
 bool pull_box_arm_retract = false;
 bool pull_bend = false;
 
@@ -135,6 +138,8 @@ bool bend_condition = false;
 bool boxGrabbed = false;
 
 int now_time = 0;
+
+bool colorBoxGrabbed = false;
 
 String mode = "normal";
 String wall_side = "";

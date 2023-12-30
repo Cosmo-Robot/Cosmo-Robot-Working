@@ -38,5 +38,6 @@ extern int Right_drive;
 
 bool squareDetected();
 bool TDetected();
+bool CrossDetected();
 
 #endif
