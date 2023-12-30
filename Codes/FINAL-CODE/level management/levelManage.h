@@ -98,6 +98,8 @@ extern int crossCount;
 
 extern bool colorBoxGrabbed;
 
+extern bool colorBoxPlaced;
+
 // Pin for right bend sensor
 #define right_bend_sensor 9
 
