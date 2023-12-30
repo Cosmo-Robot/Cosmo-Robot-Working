@@ -22,8 +22,25 @@ void checkpoint(){
         pull_box_arm_retract = false;
       }   
     }else if (pointer == 4 and colorBoxGrabbed == false){
+      motor(LEFT_MOTOR, FORWARD);
+      motor(RIGHT_MOTOR, FORWARD);
+      analogWrite(ENL, 230);
+      analogWrite(ENR, 170);delay(500);
+      arm.write(140);
+      analogWrite(ENL, 0);
+      analogWrite(ENR, 0);delay(1000);
+      colorBoxGrabbed = true;
+      motor(LEFT_MOTOR, BACKWARD);
+      motor(RIGHT_MOTOR, FORWARD);
+      analogWrite(ENL, 255);
+      analogWrite(ENR, 255);
+      delay(1500);
+      motor(LEFT_MOTOR, FORWARD);
+      motor(RIGHT_MOTOR, FORWARD);
+      analogWrite(ENL, 230);
+      analogWrite(ENR, 170);
+      delay(1400);
       
-
     }else{
       Serial.println("Square detected");
       analogWrite(ENL, 0);
