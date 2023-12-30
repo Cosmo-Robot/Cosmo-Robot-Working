@@ -22,6 +22,24 @@ void level5(){
       delay(500);
 
     }else{
+      if (color_picked == 'red'){
+        motor(LEFT_MOTOR, BACKWARD);
+        motor(RIGHT_MOTOR, FORWARD);
+        analogWrite(ENL, 255);
+        analogWrite(ENR, 255);
+        delay(750);
+      }else if (color_picked == 'blue'){
+        motor(LEFT_MOTOR, FORWARD);
+        motor(RIGHT_MOTOR, BACKWARD);
+        analogWrite(ENL, 255);
+        analogWrite(ENR, 255);
+        delay(750);
+      }
+      motor(LEFT_MOTOR, FORWARD);
+      motor(RIGHT_MOTOR, FORWARD);
+      analogWrite(ENL, 230);
+      analogWrite(ENR, 170);
+      delay(1400);
 
     }
     

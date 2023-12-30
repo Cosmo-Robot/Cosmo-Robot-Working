@@ -40,7 +40,52 @@ void checkpoint(){
       analogWrite(ENL, 230);
       analogWrite(ENR, 170);
       delay(1400);
+
+      //array of 10 intergers to record color data
+      int redColorData[10];
+      int blueColorData[10];  
+      uint16_t r, g, b, c, colorTemp, lux;
+      while (true){
+        //read color data
+        tcs.getRawData(&r, &g, &b, &c);
       
+        redColorData[count] = r;
+        blueColorData[count] = b;
+        //increment count
+        count++;
+        //if count is 10
+        if (count == 10){
+          //break out of while loop
+          break;
+        }
+        delay(100);
+      }
+
+      //calculate average of red color data
+      int redColorDataAverage = 0;
+      for (int i = 0; i < 10; i++){
+        redColorDataAverage += redColorData[i];
+      }
+      redColorDataAverage /= 10;
+
+      //calculate average of blue color data
+      int blueColorDataAverage = 0;
+      for (int i = 0; i < 10; i++){
+        blueColorDataAverage += blueColorData[i];
+      }
+      blueColorDataAverage /= 10;
+
+      //if red color data is greater than blue color data
+      if (redColorDataAverage > blueColorDataAverage){
+        //set color picked to red
+        color_picked = "red";
+      }
+      //if blue color data is greater than red color data
+      else if (blueColorDataAverage > redColorDataAverage){
+        //set color picked to blue
+        color_picked = "blue";
+      }
+
     }else{
       Serial.println("Square detected");
       analogWrite(ENL, 0);

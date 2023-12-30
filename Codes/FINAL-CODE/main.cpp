@@ -12,6 +12,8 @@
 #include <Servo.h>
 #include <Adafruit_I2CDevice.h> 
 #include <U8g2lib.h> // include u8g2 library
+#include <Wire.h>
+#include "Adafruit_TCS34725.h"
 
 // Header guard to prevent multiple inclusions
 #include "line follow/lineFollow.h"
@@ -31,6 +33,8 @@
 U8G2_SH1106_128X32_VISIONOX_F_HW_I2C u8g2(U8G2_R0, /* reset=*/U8X8_PIN_NONE);
 
 Servo arm; // create servo object to control a servo
+
+Adafruit_TCS34725 tcs = Adafruit_TCS34725();
 
 /////////////////////////////////Definitions///////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -165,6 +169,8 @@ int temp = 0;
 int Left_drive = 0;
 int Right_drive = 0;
 
+String color_picked = "none";
+
 /////////////////////////////////Function Declarations/////////////////////////////////////////////////////////////////////////////////////
 
 void motor(int , int);
@@ -182,6 +188,13 @@ void setup()
   //begin serial communication
   Serial.begin(115200);
   u8g2.begin();
+
+  if (tcs.begin()) {
+    Serial.println("Found sensor");
+  } else {
+    Serial.println("No TCS34725 found ... check your connections");
+    while (1);
+  }
 
   soundCalibrate(); // Calibrate the sound sensor
 

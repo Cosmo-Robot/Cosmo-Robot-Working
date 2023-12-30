@@ -4,6 +4,12 @@
 #include <U8g2lib.h>
 #include <Servo.h>
 
+#include <Wire.h>
+#include "Adafruit_TCS34725.h"
+
+extern Adafruit_TCS34725 tcs;
+
+
 // External servo object to control a servo
 extern Servo arm;
 
@@ -85,6 +91,8 @@ extern int prev_error_history[];
 extern int stack_pointer;
 extern int Left_drive;
 extern int Right_drive;
+
+extern String color_picked;
 
 extern int crossCount;
 
