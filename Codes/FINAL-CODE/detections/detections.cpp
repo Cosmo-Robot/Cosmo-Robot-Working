@@ -186,3 +186,51 @@ bool TDetected()
   //   return false;
   // }
 }
+
+//////////////////////////////For detecting a white cross///////////////////////////////////////////
+bool CrossDetected()
+{
+
+  if (array_lit_amount >= 11)
+  {
+    motor(LEFT_MOTOR, FORWARD);
+    motor(RIGHT_MOTOR, FORWARD);
+    analogWrite(ENL, 230);
+    analogWrite(ENR, 170);
+    delay(500);
+    analogWrite(ENL, 0);
+    analogWrite(ENR, 0);
+
+    readIRArray();
+    array_lit_amount = 0;
+    for (int i = 0; i < IR_ARRAY_LENGTH; i++)
+    {
+      array_lit_amount += IR_array[i];
+    }
+    if (array_lit_amount >= 11)
+    {
+      motor(LEFT_MOTOR, BACKWARD);
+      motor(RIGHT_MOTOR, BACKWARD);
+      analogWrite(ENL, 230);
+      analogWrite(ENR, 170);
+      delay(500);
+      return false;
+    }
+    else
+    {
+      if (array_lit_amount >= 2){
+        motor(LEFT_MOTOR, BACKWARD);
+        motor(RIGHT_MOTOR, BACKWARD);
+        analogWrite(ENL, 230);
+        analogWrite(ENR, 170);
+        delay(500);
+        return true;
+      } else{
+        return false;}
+    }
+  }
+  else
+  {
+    return false;
+  }
+}

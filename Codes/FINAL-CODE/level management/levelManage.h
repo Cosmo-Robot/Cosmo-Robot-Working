@@ -4,6 +4,12 @@
 #include <U8g2lib.h>
 #include <Servo.h>
 
+#include <Wire.h>
+#include "Adafruit_TCS34725.h"
+
+extern Adafruit_TCS34725 tcs;
+
+
 // External servo object to control a servo
 extern Servo arm;
 
@@ -16,6 +22,7 @@ void motor(int motor, int direction);
 bool squareDetected();
 bool TDetected();
 void lineFollow();
+bool CrossDetected();
 int ultrasonicDistance(int sensor);
 void readIRArray();
 void levelManage();
@@ -67,6 +74,10 @@ extern int pointer;
 // Pin for buzzer
 #define buzzer_pin 8
 
+//sharpIR pin
+#define front_distane_sensor A15 // Sharp IR GP2Y0A41SK0F (4-30cm, analog)
+
+
 // Line color definition
 extern const String LINE_COLOR;
 
@@ -80,6 +91,14 @@ extern int prev_error_history[];
 extern int stack_pointer;
 extern int Left_drive;
 extern int Right_drive;
+
+extern String color_picked;
+
+extern int crossCount;
+
+extern bool colorBoxGrabbed;
+
+extern bool colorBoxPlaced;
 
 // Pin for right bend sensor
 #define right_bend_sensor 9
