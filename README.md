@@ -1,7 +1,7 @@
 <h1>Cosmo Robot</h1>
 
-![Cosmo Robot](Images/in_operation.jpg)
-<!-- <img src="Images/in_operation.jpg" width="80%"> -->
+<!-- ![Cosmo Robot](Images/in_operation.jpg) -->
+<img src="Images/in_operation.jpg" width="70%">
 
 
 <h2>Project Summary</h2>
