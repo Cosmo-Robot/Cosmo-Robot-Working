@@ -8,6 +8,17 @@
 
   <p>This project was based on Arduino Mega 2560 and developed for the robot competition held under the Semester 3 module EN2533: Robot Design and Competition. "Cosmo" robot is designed to showcase various capabilities, including precise line following, obstacle avoidance during line following, navigating ramps at 20 - 30 degrees, interacting with objects using a mechanical arm, sound sensitivity, color detection, and maze-solving capabilities. Additionally, it was programmed to avoid other robots in the arena such as the guard robot, on its way to the final destination.</p>
 
+
+
+
+
+https://github.com/Cosmo-Robot/Cosmo-Robot-Working/assets/111054736/55ebefc1-eb35-40b0-912c-31b81b9e3f68
+
+
+
+
+  
+
   <h2>Features</h2>
 
   <ul>
