@@ -49,14 +49,14 @@
 
 
 
-1. All robots will commence their journey from the designated starting location.
+1. Robot will commence it's journey from the designated starting location.
 2. If you are unable to complete the task by starting from the designated starting location,
 you can start from a checkpoint that is not the designated starting checkpoint with a
 penalty.
 3. While following the line, the robot shouldn’t collide with any object that isn’t specifically
 mentioned in the document.
 4. When the robot is navigating from checkpoint - 3 to checkpoint - 4, it must go over the
-bridge section and follow the line afterward. There will be line on the bridge, as well.
+bridge section and follow the line afterward. There will be a line on the bridge, as well.
 5. You can use any mechanism to find the path to reach checkpoint - 5.
 6. Pick and place the colored box in the relevant colored space.
 7. The robot should freeze when sounds emit from the sound tower.
