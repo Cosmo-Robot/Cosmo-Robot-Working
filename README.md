@@ -44,7 +44,7 @@
 
  <h2>Capable Tasks of the Robot </h2>
 
-  <img src="Images/in_operation.jpg" width="70%">
+  <img src="Images/Arena.png" width="70%">
 
 
 
